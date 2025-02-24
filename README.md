@@ -1,3 +1,5 @@
+To run app in debug mode: `flask --app flaskr run --debug`
+
 # User Stories for an Apartment Listing/Finding Site
 
 ## 1. User Authentication & Management
