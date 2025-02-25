@@ -1,4 +1,5 @@
-DROP TABLE IF EXISTS app_users;
+-- TODO need to add this table to postgres + add script to ensure db properly configured.
+ TABLE IF EXISTS app_users;
 
 CREATE TABLE app_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
