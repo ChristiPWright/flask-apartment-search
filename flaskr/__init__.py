@@ -19,7 +19,8 @@ def create_app(test_config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-
+    
+    from flaskr.models.models import AppUser 
 
     # ensure the instance folder exists
     try:
