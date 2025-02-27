@@ -11,11 +11,14 @@ migrate = Migrate()
 
 
 def create_app(test_config=None):
-    # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    if test_config is not None:
+        app.config.from_mapping(test_config)
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
     db.init_app(app)
     migrate.init_app(app, db)
     
