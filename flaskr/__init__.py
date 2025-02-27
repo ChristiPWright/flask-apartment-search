@@ -16,7 +16,6 @@ def create_app(test_config=None):
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
     db.init_app(app)
     migrate.init_app(app, db)
     
@@ -28,13 +27,10 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # from . import db
-    # db.init_app(app)
-
     from . import auth
     app.register_blueprint(auth.bp)
 
-    #replace silly route with route structure
+    #sanity route
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
