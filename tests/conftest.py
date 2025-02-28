@@ -1,4 +1,5 @@
 #PYTHONPATH=./ pytest tests to run test files
+#TODO: how can we confirm our setup is correct and db is properly formed?
 import os
 
 import pytest
