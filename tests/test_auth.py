@@ -4,25 +4,33 @@ from flask import g, json, session
 from flaskr import db
 from flaskr.models.models import AppUser
 
-def test_register(client, app):
-    with app.app_context():
+@pytest.mark.parametrize(
+    "payload, expected_key, expected_message, expected_status",
+    [
+        # Valid registration
+        ({"email": "a@example.com", "password": "password123"}, "message", "User registered successfully.", 201),
+        # Missing email
+        ({"password": "password123"}, "error", "Email is requred.", 400),
+        # Missing password
+        ({"email": "b@example.com"}, "error", "Password is required.", 400),
+        # Email already exists
+        ({"email": "a@example.com", "password": "password123"}, "error", "User a@example.com is unavailable for registration.", 400),
+    ],
+)
+def test_register(client, app, payload, expected_key, expected_message, expected_status): 
+    with app.app_context():  
         response = client.post(
-            '/auth/register',
-            data=json.dumps({'email': 'a', 'password': 'a'}),  # Convert dict to JSON
-            content_type='application/json' 
+            "/auth/register",
+            data=json.dumps(payload),
+            content_type="application/json",
         )
 
-    assert response.json['message'] == 'User registered successfully'
-    assert response.status_code == 201
+        assert response.status_code == expected_status
+        
+        response_json = response.get_json()
+        assert response_json[expected_key] == expected_message
 
-    #TODO: 2x check db setup/teardown with this psql user's permissions
-    with app.app_context():
-        app_user = AppUser.query.filter_by(email='a').first()
-        assert app_user is not None
-
-#TODO: read docs and understand parametrize 
-# @pytest.mark.parametrize(('username', 'password', 'message'), (
-#     ('', '', b'Username is required.'),
-#     ('a', '', b'Password is required.'),
-#     ('test', 'test', b'already registered'),
-# ))
+        # If registration was successful, check the database
+        if response.status_code == 201:
+            app_user = AppUser.query.filter_by(email=payload["email"]).first()
+            assert app_user is not None, "User was not created in the database."

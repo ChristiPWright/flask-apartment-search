@@ -16,7 +16,7 @@ def register():
 
     email = data.get('email')
     password = data.get('password')
-    
+
     if not email:
         return jsonify({'error': 'Email is requred.'}), 400
     if not password:
@@ -34,5 +34,5 @@ def register():
         current_app.logger.error(f"Error occurred: {e}")
         return jsonify({'error': 'An error occurred while registering the user.'}), 500
     
-    return jsonify({'message': 'User registered successfully'}), 201
+    return jsonify({'message': 'User registered successfully.'}), 201
 
