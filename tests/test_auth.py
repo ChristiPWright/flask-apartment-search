@@ -22,7 +22,7 @@ def session_user(app):
         # Missing password
         ({"email": "b@example.com"}, "error", "Password is required.", 400),
         # Email already exists
-        ({"email": "session@example.com", "password": "password123"}, "error", "User session@example.com is unavailable for registration.", 400),
+        ({"email": "session@example.com", "password": "sessionpassword123"}, "error", "User session@example.com is unavailable for registration.", 400),
     ],
 )
 def test_register(client, app, session_user, payload, expected_key, expected_message, expected_status): 
@@ -42,3 +42,31 @@ def test_register(client, app, session_user, payload, expected_key, expected_mes
         if response.status_code == 201:
             app_user = AppUser.query.filter_by(email=payload["email"]).first()
             assert app_user is not None, "User was not created in the database."
+
+# /auth/login
+@pytest.mark.parametrize(
+    "payload, expected_return, expected_status",
+    [
+        # Valid login
+        ({"email": "session@example.com", "password": "sessionpassword123"}, {"access_token": "","token_type": "Bearer"}, 200),
+        # Invalid email
+        ({"email": "nonexistant@example.com", "password": "password123"}, {"error": "Invalid username or password."}, 401),
+        # Invalid Password
+        ({"email": "session@example.com", "password": "wrongpassword"}, {"error": "Invalid username or password."}, 401),
+        # Missing required field, email
+        ({"password": "password123"}, {"error": "Missing username or password."}, 400),
+
+    ]
+)
+def test_login(client, app, session_user, payload, expected_return, expected_status):
+    with app.app_context():
+        response = client.post(
+            "/auth/login",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        assert response.status_code == expected_status
+
+        response_json = response.get_json()
+        assert response_json == expected_return
