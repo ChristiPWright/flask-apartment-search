@@ -1,5 +1,4 @@
 #PYTHONPATH=./ pytest tests to run test files
-#TODO: how can we confirm our setup is correct and db is properly formed?
 import os
 
 import pytest
@@ -40,11 +39,11 @@ def client(app):
     return app.test_client()
 
 @pytest.fixture(scope='session')
-def init_db(app):
+def init_session_db(app):
     """Initialize the test database."""
     with app.app_context():
         db.create_all()  # Ensure tables exist
-        print("✅ Tables in DB:", db.engine.table_names())  # Debugging
+        print("✅ Tables in Session DB:", db.engine.table_names())  # Debugging
 
     yield db  # Provide the db instance for tests
 
@@ -53,14 +52,14 @@ def init_db(app):
         db.drop_all()
 
 @pytest.fixture(scope='function')
-def session(init_db):
+def session(init_session_db):
     """Provide a clean session for each test."""
-    connection = init_db.engine.connect()
+    connection = init_session_db.engine.connect()
     transaction = connection.begin()
     
     # Create a new session
     session = sessionmaker(bind=connection)()
-    init_db.session = session
+    init_session_db.session = session
     
     yield session  # Yield the session to the test
     

@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,10 +20,16 @@ def create_app(test_config=None):
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+    app.config['JWT_TOKEN_LOCATION'] = ['headers']
+    
     db.init_app(app)
     migrate.init_app(app, db)
     
     from flaskr.models.models import AppUser 
+
+    jwt = JWTManager(app)
+
 
     # ensure the instance folder exists
     try:
