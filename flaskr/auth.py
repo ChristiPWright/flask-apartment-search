@@ -1,7 +1,7 @@
-#TODO: lets add input validation, hashing, salt later
+#TODO: lets add input validation
 #TODO: add internationalization on messaging
 
-from flask import Blueprint, request, jsonify, session, g, current_app
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -27,7 +27,7 @@ def register():
     if existing_user:
             return jsonify({'error': f'User {email} is unavailable for registration.'}), 400
     try:
-        new_user = AppUser(email=email, password=password)
+        new_user = AppUser(email=email, password=generate_password_hash(password))
         db.session.add(new_user)
         db.session.commit()
     except Exception as e:
@@ -47,13 +47,11 @@ def login():
     email = data.get('email')
     password = data.get('password')
 
-    if not email:
-        return jsonify({'error': 'Missing email or password.'}), 400
-    if not password:
+    if not email or not password:
         return jsonify({'error': 'Missing email or password.'}), 400
     
     existing_user = AppUser.query.filter_by(email=email).first()
-    if existing_user is None or existing_user.password != password:
+    if existing_user is None or not check_password_hash(existing_user.password, password):
         return jsonify({'error': 'Invalid username or password.'}), 401
 
     access_token = create_access_token(identity=existing_user.id)

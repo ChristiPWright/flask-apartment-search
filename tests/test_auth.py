@@ -1,13 +1,14 @@
 import pytest
-from flask import g, json, session
+from flask import json
 
 from flaskr import db
 from flaskr.models.models import AppUser
+from werkzeug.security import check_password_hash, generate_password_hash
 
 @pytest.fixture(scope="session")
 def session_user(app):
     with app.app_context():
-        user = AppUser(email="session@example.com", password="sessionpassword123")
+        user = AppUser(email="session@example.com", password=generate_password_hash('sessionpassword123'))
         db.session.add(user)
         db.session.commit()  
         yield user  
