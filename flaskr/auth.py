@@ -2,6 +2,7 @@
 #TODO: add internationalization on messaging
 
 from flask import Blueprint, request, jsonify, session, g, current_app
+from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr import db
@@ -36,3 +37,37 @@ def register():
     
     return jsonify({'message': 'User registered successfully.'}), 201
 
+
+# auth/login
+@bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    current_app.logger.info(data)
+
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email:
+        return jsonify({'error': 'Missing email or password.'}), 400
+    if not password:
+        return jsonify({'error': 'Missing email or password.'}), 400
+    
+    existing_user = AppUser.query.filter_by(email=email).first()
+    if existing_user is None or existing_user.password != password:
+        return jsonify({'error': 'Invalid username or password.'}), 401
+
+    access_token = create_access_token(identity=existing_user.id)
+    
+    return jsonify({
+        "access_token": f'{access_token}',
+        "token_type": "Bearer",
+        "user": {
+            "email": f'{existing_user.email}',
+            "name": f'{existing_user.name}',
+            "id": f'{existing_user.id}'
+        }
+    }), 200
+
+# auth/logout
+
+# auth/unregister = delete user
