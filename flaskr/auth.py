@@ -2,7 +2,8 @@
 #TODO: add internationalization on messaging
 
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from sqlalchemy import delete
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr import db
@@ -27,7 +28,10 @@ def register():
     if existing_user:
             return jsonify({'error': f'User {email} is unavailable for registration.'}), 400
     try:
-        new_user = AppUser(email=email, password=generate_password_hash(password))
+        new_user = AppUser(
+            email=email, 
+            password=generate_password_hash(password)
+        )
         db.session.add(new_user)
         db.session.commit()
     except Exception as e:
@@ -66,6 +70,27 @@ def login():
         }
     }), 200
 
-# auth/logout
+# /auth/unregister
+@bp.route('/unregister', methods=['DELETE'])
+@jwt_required()
+def unregister():
+    current_user_id = get_jwt_identity()
+    try:
+        #TODO: as additional features are added - look into cascade deletes
+        result = db.session.execute(delete(AppUser).where(AppUser.id  == current_user_id))
+        if result.rowcount == 0:
+            return jsonify({"error": "User not found."}), 404
+        db.session.commit()
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while unregistering the user.'}), 500
+    
+    return jsonify({"message": "User unregistered successfully."}), 204 
 
-# auth/unregister = delete user
+# /auth/update-profile
+
+# /auth/upload-profile-picture
+# POST /auth/upload-profile-picture
+# Authorization: Bearer <access_token>
+# Content-Type: multipart/form-data
+# Body:
+#   - profile_picture: (binary image file)

@@ -1,17 +1,19 @@
 import pytest
 from flask import json
+from werkzeug.security import generate_password_hash
+from flask_jwt_extended import create_access_token
 
 from flaskr import db
 from flaskr.models.models import AppUser
-from werkzeug.security import check_password_hash, generate_password_hash
 
 @pytest.fixture(scope="session")
 def session_user(app):
     with app.app_context():
         user = AppUser(email="session@example.com", password=generate_password_hash('sessionpassword123'))
         db.session.add(user)
-        db.session.commit()  
-        yield user  
+        db.session.commit()
+
+        yield user
 
 @pytest.mark.parametrize(
     "payload, expected_key, expected_message, expected_status",
@@ -68,3 +70,31 @@ def test_login(client, app, session_user, payload, expected_status):
         )
 
         assert response.status_code == expected_status
+
+# /auth/unregister
+@pytest.fixture(scope="session")
+def delete_user(app):
+    with app.app_context():
+        user = AppUser(email="delete@example.com", password=generate_password_hash('deletepassword123'))
+        db.session.add(user)
+        db.session.commit()
+
+        yield user
+
+def test_unregister(client, app, delete_user):
+    with app.app_context():
+        token_user_to_unregister = create_access_token(identity=delete_user.id)
+
+        response = client.delete(
+            "/auth/unregister", 
+            headers={"Authorization": f"Bearer {token_user_to_unregister}"}
+        )
+        assert response.status_code == 204
+        
+        deleted_user = AppUser.query.filter_by(email=delete_user.email).first()
+        assert deleted_user is None
+        
+
+# /auth/update-profile
+
+# /auth/upload-profile-picture
