@@ -1,4 +1,4 @@
-#TODO: lets add input validation
+#TODO: lets add input validation; look into pydantic or marshmallow
 #TODO: add internationalization on messaging
 
 from flask import Blueprint, request, jsonify, current_app
@@ -87,6 +87,31 @@ def unregister():
     return jsonify({"message": "User unregistered successfully."}), 204 
 
 # /auth/update-profile
+# handle email & passoword updates in user story 1C
+@bp.route('/update-profile', methods=['PATCH'])
+@jwt_required()
+def update_profile():
+    authenticated_user_id = get_jwt_identity()
+    user = db.session.get(AppUser, authenticated_user_id)
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    
+    data = request.get_json()
+    for key in ["phone", "name"]:
+        if key in data:
+            setattr(user, key, data[key])
+    try:
+        db.session.commit()
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while updating the user.'}), 500
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "phone": user.phone,
+        "name": user.name
+    }), 200
 
 # /auth/upload-profile-picture
 # POST /auth/upload-profile-picture

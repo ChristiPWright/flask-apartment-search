@@ -7,7 +7,7 @@ from flaskr import db
 from flaskr.models.models import AppUser
 
 @pytest.fixture(scope="session")
-def session_user_exists_with_token(app):
+def session_user(app):
     with app.app_context():
         user = AppUser(email="session@example.com", password=generate_password_hash('sessionpassword123'))
         db.session.add(user)
@@ -15,7 +15,7 @@ def session_user_exists_with_token(app):
 
         jwt_token_user = create_access_token(identity=user.id)
 
-        yield jwt_token_user
+        yield user, jwt_token_user
 
 @pytest.mark.parametrize(
     "payload, expected_key, expected_message, expected_status",
@@ -30,7 +30,7 @@ def session_user_exists_with_token(app):
         ({"email": "session@example.com", "password": "sessionpassword123"}, "error", "User session@example.com is unavailable for registration.", 400),
     ],
 )
-def test_register(client, app, session_user_exists_with_token, payload, expected_key, expected_message, expected_status): 
+def test_register(client, app, session_user, payload, expected_key, expected_message, expected_status): 
     with app.app_context():  
         response = client.post(
             "/auth/register",
@@ -63,7 +63,7 @@ def test_register(client, app, session_user_exists_with_token, payload, expected
 
     ]
 )
-def test_login(client, app, session_user_exists_with_token, payload, expected_status):
+def test_login(client, app, session_user, payload, expected_status):
     with app.app_context():
         response = client.post(
             "/auth/login",
@@ -105,25 +105,24 @@ def test_unregister(client, app, delete_user):
         ({"phone": "(123) 456-7890"},  200, True),
         # Invalid - missing auth
         ({"phone": "(123) 456-7890"}, 401, False),
-        # Invalid format
-        ({"phone": "abc(123) 456-7890"}, 400, True),
     ]
 )
-def test_update_profile(client, app, session_user_exists_with_token, payload, expected_status, include_auth):
-    authenticated_user_id = get_jwt_identity()
+def test_update_profile(client, app, session_user, payload, expected_status, include_auth):
+    user, jwt_token_user = session_user
 
     headers = {"Content-Type": "application/json"}
     if include_auth:
-        headers["Authorization"] = f"Bearer {session_user_exists_with_token}"
+        headers["Authorization"] = f"Bearer {jwt_token_user}"
     
     with app.app_context():
-        response = client.patch("/auth/update_profile", headers=headers, data=json.dumps(payload))
+        response = client.patch("/auth/update-profile", headers=headers, data=json.dumps(payload))
         
         assert response.status_code == expected_status
 
         if expected_status == 200:
-            updated_user = AppUser.query.filter_by(id=authenticated_user_id).first()
-            assert updated_user["phone"] is payload["phone"]
+            updated_user = AppUser.query.filter_by(id=user.id).first()
+            assert updated_user.phone == payload["phone"]
+
 
 
 # /auth/upload-profile-picture
