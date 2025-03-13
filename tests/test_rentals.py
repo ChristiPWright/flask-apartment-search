@@ -18,17 +18,17 @@ def session_user(app):
         yield user, jwt_token_user
 
 # POST /rentals
-@pytest.mark.parametrize(
-        "payload, expected_status, include_auth",
-        [
-            # Unauthorize should fail
-            # Valid create 
-            # Invalid user auth should fail.. is that even a resonable check; shouldn't auth/jwt ensure that?
-            # Invalid data should fail
-        ]
-)
+# @pytest.mark.parametrize(
+#         "payload, expected_status, include_auth",
+#         [
+#             # Unauthorize should fail
+#             # Valid create 
+#             # Invalid user auth should fail.. is that even a resonable check; shouldn't auth/jwt ensure that?
+#             # Invalid data should fail
+#         ]
+# )
 
-def test_create_rental(client, app, session_user, payload, expected_status, include_auth):
+# def test_create_rental(client, app, session_user, payload, expected_status, include_auth):
     user, jwt_token_user = session_user
 
     headers = {"Content-Type": "application/json"}
