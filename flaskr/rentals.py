@@ -1,0 +1,1 @@
+# TODO: Add Swagger docs -- https://github.com/ChristiPWright/flask-apartment-search/issues/8

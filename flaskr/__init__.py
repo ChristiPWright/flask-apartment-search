@@ -1,3 +1,5 @@
+#TODO: Added linter https://github.com/ChristiPWright/flask-apartment-search/issues/7
+
 import os
 
 from flask import Flask

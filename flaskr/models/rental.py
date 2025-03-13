@@ -1,6 +1,7 @@
 from flaskr import db
 import uuid
 import sqlalchemy
+from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID, MONEY
 
 class Rental(db.Model):
@@ -13,3 +14,5 @@ class Rental(db.Model):
     address = db.Column(db.String(256), nullable=False)
     price = db.Column(MONEY, nullable=False)
     status = db.Column(sqlalchemy.Enum('active', 'inactive', name='rental_status', create_type=True), nullable=False, default='active')
+    created_at = db.Column(db.DateTime(timezone=True), default=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()))
+    updated_at = db.Column(db.DateTime(timezone=True), default=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()), onupdate=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()))

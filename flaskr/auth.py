@@ -85,6 +85,8 @@ def unregister():
     return jsonify({"message": "User unregistered successfully."}), 204 
 
 # /auth/update-profile
+# This doesn't make as much sense maybe want to switch to route name like below
+# POST /users/{user_id}/profile-picture route idea
 # handle email & passoword updates in user story 1C
 @bp.route('/update-profile', methods=['PATCH'])
 @jwt_required()
