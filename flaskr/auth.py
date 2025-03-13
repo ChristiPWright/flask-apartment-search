@@ -58,7 +58,7 @@ def login():
     if existing_user is None or not check_password_hash(existing_user.password, password):
         return jsonify({'error': 'Invalid username or password.'}), 401
 
-    access_token = create_access_token(identity=existing_user.id)
+    access_token = create_access_token(identity=existing_user.user_id)
     
     return jsonify({
         "access_token": f'{access_token}',
@@ -66,7 +66,7 @@ def login():
         "user": {
             "email": f'{existing_user.email}',
             "name": f'{existing_user.name}',
-            "id": f'{existing_user.id}'
+            "user_id": f'{existing_user.user_id}'
         }
     }), 200
 
@@ -105,7 +105,7 @@ def update_profile():
         return jsonify({'error': 'An error occurred while updating the user.'}), 500
 
     return jsonify({
-        "id": user.id,
+        "user_id": user.user_id,
         "email": user.email,
         "phone": user.phone,
         "name": user.name

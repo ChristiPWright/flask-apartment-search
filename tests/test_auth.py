@@ -13,7 +13,7 @@ def session_user(app):
         db.session.add(user)
         db.session.commit()
 
-        jwt_token_user = create_access_token(identity=user.id)
+        jwt_token_user = create_access_token(identity=user.user_id)
 
         yield user, jwt_token_user
 
@@ -85,7 +85,7 @@ def delete_user(app):
 
 def test_unregister(client, app, delete_user):
     with app.app_context():
-        token_user_to_unregister = create_access_token(identity=delete_user.id)
+        token_user_to_unregister = create_access_token(identity=delete_user.user_id)
 
         response = client.delete(
             "/auth/unregister", 
@@ -120,7 +120,7 @@ def test_update_profile(client, app, session_user, payload, expected_status, inc
         assert response.status_code == expected_status
 
         if expected_status == 200:
-            updated_user = AppUser.query.filter_by(id=user.id).first()
+            updated_user = AppUser.query.filter_by(user_id=user.user_id).first()
             assert updated_user.phone == payload["phone"]
 
 
