@@ -5,3 +5,4 @@
 
 
 from . app_user import AppUser
+from . rental import Rental

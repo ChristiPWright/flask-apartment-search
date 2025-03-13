@@ -25,7 +25,7 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)
     
-    from flaskr.models.models import AppUser 
+    from flaskr.models.models import AppUser, Rental 
 
     jwt = JWTManager(app)
 
