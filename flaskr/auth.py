@@ -76,10 +76,8 @@ def login():
 def unregister():
     current_user_id = get_jwt_identity()
     try:
-        #TODO: as additional features are added - look into cascade deletes
-        result = db.session.execute(delete(AppUser).where(AppUser.id  == current_user_id))
-        if result.rowcount == 0:
-            return jsonify({"error": "User not found."}), 404
+        user = db.session.get(AppUser, current_user_id)
+        db.session.delete(user)
         db.session.commit()
     except Exception as e:
         return jsonify({'error': 'An error occurred while unregistering the user.'}), 500
