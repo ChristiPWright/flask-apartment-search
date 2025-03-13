@@ -1,13 +1,15 @@
 To run app in debug mode: `flask --app flaskr run --debug`
+#TODO: Added linter
+
 
 # User Stories for an Apartment Listing/Finding Site
 
 ## 1. User Authentication & Management
 - [x] **As a visitor**, I want to sign up with an email and password so that I can create an account.
 - [x] **As a registered user**, I want to log in securely so that I can access my account.
-- **As a user**, I want to reset my password if I forget it so that I can regain access to my account.
+- [:x:] **As a user**, I want to reset my password if I forget it so that I can regain access to my account.
 - **As a user**, I want to update my profile (name, phone, profile picture) so that I can keep my information current.
-- **As a user**, I want to delete my account if I no longer need the service.
+- [x] **As a user**, I want to delete my account if I no longer need the service.
 
 ## 2. Apartment Listings
 - **As a landlord**, I want to create a listing with details (title, description, location, price, images, amenities [washer/dryer, dishwasher, AC/Heat, Pet policy, parking, fitness, pool, balcony/patio]) so that renters can find my property.
