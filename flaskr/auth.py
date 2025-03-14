@@ -76,6 +76,8 @@ def login():
 @jwt_required()
 def unregister():
     current_user = check_user()
+    if isinstance(current_user, tuple): 
+        return current_user
     try:
         db.session.delete(current_user)
         db.session.commit()
@@ -92,6 +94,8 @@ def unregister():
 @jwt_required()
 def update_profile():
     authenticated_user = check_user()
+    if isinstance(authenticated_user, tuple): 
+        return authenticated_user
 
     data = request.get_json()
     for key in ["phone", "name"]:

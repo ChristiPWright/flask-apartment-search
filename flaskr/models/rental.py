@@ -12,7 +12,7 @@ class Rental(db.Model):
     title = db.Column(db.String(256), nullable=True)
     description = db.Column(db.String(256), nullable=True)
     address = db.Column(db.String(256), nullable=False)
-    price = db.Column(MONEY, nullable=False)
+    price = db.Column(MONEY, nullable=False, default=0)
     status = db.Column(sqlalchemy.Enum('active', 'inactive', name='rental_status', create_type=True), nullable=False, default='active')
     created_at = db.Column(db.DateTime(timezone=True), default=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()))
     updated_at = db.Column(db.DateTime(timezone=True), default=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()), onupdate=sqlalchemy.func.timezone('UTC', sqlalchemy.func.current_timestamp()))
