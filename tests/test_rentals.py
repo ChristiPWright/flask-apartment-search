@@ -22,10 +22,11 @@ def session_user(app):
         "payload, expected_status, include_auth",
         [
             # Unauthorize should fail
+            ({"title": "Spacious Apt", "price": 1200, "address": "123 Main St, Good Town, CA, 98754"},  401, False),
             # Valid create 
             ({"title": "Spacious Apt", "price": 1200, "address": "123 Main St, Good Town, CA, 98754"},  200, True),
-            # Invalid user auth should fail.. is that even a resonable check; shouldn't auth/jwt ensure that?
-            # Invalid data should fail
+            # # Invalid data should fail
+            # ({"title": "Spacious Apt", "price": 1200, "address": "you know"},  422, True),
         ]
 )
 
