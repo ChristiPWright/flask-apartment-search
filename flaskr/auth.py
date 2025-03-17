@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr import db
 from flaskr.models.models import AppUser
-from flaskr.utils.auth import check_user
+from flaskr.utils.auth_util import check_user
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
