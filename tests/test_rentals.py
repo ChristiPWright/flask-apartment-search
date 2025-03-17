@@ -43,9 +43,9 @@ def test_create_rental(client, app, session_user, payload, expected_status, incl
             data=json.dumps(payload)
         )
 
-        print(response)
         assert response.status_code == expected_status
 
-        # if expected_status == 200:
-        #     created_rental = Rental.query.filter_by(rental_id=response.data.rental_id)
-        #     assert created_rental is not None
+        if expected_status == 200:
+            rental_id = json.loads(response.get_data(as_text=True)).get("rental_id")
+            created_rental = Rental.query.filter_by(rental_id=rental_id).first()
+            assert created_rental is not None

@@ -38,8 +38,9 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import auth
+    from . import auth, rentals
     app.register_blueprint(auth.bp)
+    app.register_blueprint(rentals.bp)
 
     #sanity route
     @app.route('/hello')
