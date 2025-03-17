@@ -1,3 +1,5 @@
+#TODO: Added linter https://github.com/ChristiPWright/flask-apartment-search/issues/7
+
 import os
 
 from flask import Flask
@@ -9,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
-
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -26,7 +27,7 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)
     
-    from flaskr.models.models import AppUser 
+    from flaskr.models.models import AppUser, Rental 
 
     jwt = JWTManager(app)
 
@@ -37,8 +38,9 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import auth
+    from . import auth, rentals
     app.register_blueprint(auth.bp)
+    app.register_blueprint(rentals.bp)
 
     #sanity route
     @app.route('/hello')

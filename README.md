@@ -1,6 +1,4 @@
 To run app in debug mode: `flask --app flaskr run --debug`
-#TODO: Added linter
-
 
 # User Stories for an Apartment Listing/Finding Site
 

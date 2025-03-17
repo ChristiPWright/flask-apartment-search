@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr import db
 from flaskr.models.models import AppUser
+from flaskr.utils.auth import check_user
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -58,7 +59,7 @@ def login():
     if existing_user is None or not check_password_hash(existing_user.password, password):
         return jsonify({'error': 'Invalid username or password.'}), 401
 
-    access_token = create_access_token(identity=existing_user.id)
+    access_token = create_access_token(identity=existing_user.user_id)
     
     return jsonify({
         "access_token": f'{access_token}',
@@ -66,7 +67,7 @@ def login():
         "user": {
             "email": f'{existing_user.email}',
             "name": f'{existing_user.name}',
-            "id": f'{existing_user.id}'
+            "user_id": f'{existing_user.user_id}'
         }
     }), 200
 
@@ -74,10 +75,11 @@ def login():
 @bp.route('/unregister', methods=['DELETE'])
 @jwt_required()
 def unregister():
-    current_user_id = get_jwt_identity()
+    current_user = check_user()
+    if isinstance(current_user, tuple): 
+        return current_user
     try:
-        user = db.session.get(AppUser, current_user_id)
-        db.session.delete(user)
+        db.session.delete(current_user)
         db.session.commit()
     except Exception as e:
         return jsonify({'error': 'An error occurred while unregistering the user.'}), 500
@@ -85,30 +87,30 @@ def unregister():
     return jsonify({"message": "User unregistered successfully."}), 204 
 
 # /auth/update-profile
+# This doesn't make as much sense maybe want to switch to route name like below
+# POST /users/{user_id}/profile-picture route idea
 # handle email & passoword updates in user story 1C
 @bp.route('/update-profile', methods=['PATCH'])
 @jwt_required()
 def update_profile():
-    authenticated_user_id = get_jwt_identity()
-    user = db.session.get(AppUser, authenticated_user_id)
+    authenticated_user = check_user()
+    if isinstance(authenticated_user, tuple): 
+        return authenticated_user
 
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
-    
     data = request.get_json()
     for key in ["phone", "name"]:
         if key in data:
-            setattr(user, key, data[key])
+            setattr(authenticated_user, key, data[key])
     try:
         db.session.commit()
     except Exception as e:
         return jsonify({'error': 'An error occurred while updating the user.'}), 500
 
     return jsonify({
-        "id": user.id,
-        "email": user.email,
-        "phone": user.phone,
-        "name": user.name
+        "user_id": authenticated_user.user_id,
+        "email": authenticated_user.email,
+        "phone": authenticated_user.phone,
+        "name": authenticated_user.name
     }), 200
 
 # /auth/upload-profile-picture
