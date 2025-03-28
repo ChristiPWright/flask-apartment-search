@@ -1,4 +1,4 @@
-#PYTHONPATH=./ pytest tests to run test files
+# `PYTHONPATH=./ pytest tests` to run test files
 import os
 
 import pytest

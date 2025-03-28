@@ -9,7 +9,7 @@ from flaskr.models.models import Rental, AppUser
 @pytest.fixture(scope="session")
 def session_user(app):
     with app.app_context():
-        user = AppUser(email="session@example.com", password=generate_password_hash('sessionpassword123'))
+        user = AppUser(email="rental_session@example.com", password=generate_password_hash('sessionpassword123'))
         db.session.add(user)
         db.session.commit()
 
@@ -26,7 +26,7 @@ def session_user(app):
             # Valid create 
             ({"title": "Spacious Apt", "price": 1200, "address": "123 Main St, Good Town, CA, 98754"},  200, True),
             # # Invalid data should fail
-            # ({"title": "Spacious Apt", "price": 1200, "address": "you know"},  422, True),
+            ({"title": "Spacious Apt", "price": "1200" },  422, True),
         ]
 )
 
