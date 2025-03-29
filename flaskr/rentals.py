@@ -1,13 +1,17 @@
 # TODO: Add Swagger docs -- https://github.com/ChristiPWright/flask-apartment-search/issues/8
 
-from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from sqlalchemy import delete
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 
 from flaskr import db
-from flaskr.models.models import Rental, AppUser
+from flaskr.models.models import Rental
+
+from flaskr.schema.marshmallow_schema import CreateRentalSchema
+from marshmallow import ValidationError
+
 from flaskr.utils.auth_util import check_user
+
+create_rental_schema = CreateRentalSchema()
 
 bp = Blueprint('rentals', __name__, url_prefix='/')
 @bp.before_request
@@ -20,15 +24,16 @@ def create_rental():
     if isinstance(authenticated_user, tuple): 
         return authenticated_user
     
-    data = request.get_json()
-    title = data.get("title")
-    description = data.get("description")
-    address = data.get("address")
-    price = data.get("price")
-    status = data.get("status")
+    try:
+        data = create_rental_schema.load(request.json)
+        title = data.get("title")
+        description = data.get("description")
+        address = data.get("address")
+        price = data.get("price")
+        status = data.get("status")
 
-    if not address:
-        return jsonify({'error': 'Address is requred.'}), 400
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 422
 
     new_rental = Rental(
         lister_id = authenticated_user.user_id,

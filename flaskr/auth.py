@@ -1,8 +1,8 @@
-#TODO: lets add input validation; look into pydantic or marshmallow
 #TODO: add internationalization on messaging
 
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from marshmallow import ValidationError
 from sqlalchemy import delete
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -10,21 +10,24 @@ from flaskr import db
 from flaskr.models.models import AppUser
 from flaskr.utils.auth_util import check_user
 
+from flaskr.schema.marshmallow_schema import AuthSchema, ProfileSchema
+
+auth_schema = AuthSchema()
+profile_schema = ProfileSchema()
+
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    current_app.logger.info(data)
+    try:
+        data = auth_schema.load(request.json)
+        current_app.logger.info(data)
+
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
 
     email = data.get('email')
     password = data.get('password')
-
-    if not email:
-        return jsonify({'error': 'Email is requred.'}), 400
-    if not password:
-        return jsonify({'error': 'Password is required.'}), 400
-    
     existing_user = AppUser.query.filter_by(email=email).first()
     if existing_user:
             return jsonify({'error': f'User {email} is unavailable for registration.'}), 400
@@ -46,15 +49,16 @@ def register():
 # auth/login
 @bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    current_app.logger.info(data)
+    try: 
+        data = auth_schema.load(request.json)
+        current_app.logger.info(data)
 
-    email = data.get('email')
-    password = data.get('password')
+        email = data.get('email')
+        password = data.get('password')
 
-    if not email or not password:
-        return jsonify({'error': 'Missing email or password.'}), 400
-    
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
     existing_user = AppUser.query.filter_by(email=email).first()
     if existing_user is None or not check_password_hash(existing_user.password, password):
         return jsonify({'error': 'Invalid username or password.'}), 401
@@ -97,10 +101,19 @@ def update_profile():
     if isinstance(authenticated_user, tuple): 
         return authenticated_user
 
-    data = request.get_json()
-    for key in ["phone", "name"]:
-        if key in data:
-            setattr(authenticated_user, key, data[key])
+    try:
+        data = profile_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 422
+    
+    phone = data.get('phone')
+    name = data.get('name')
+
+    if phone != None:
+        setattr(authenticated_user, 'phone', phone)  
+    if name != None:
+        setattr(authenticated_user, 'name', name)  
+
     try:
         db.session.commit()
     except Exception as e:

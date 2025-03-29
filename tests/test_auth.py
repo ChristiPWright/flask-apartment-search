@@ -23,9 +23,9 @@ def session_user(app):
         # Valid registration
         ({"email": "a@example.com", "password": "password123"}, "message", "User registered successfully.", 201),
         # Missing email
-        ({"password": "password123"}, "error", "Email is requred.", 400),
+        ({"password": "password123"}, "errors", {'email': ['Missing data for required field.']}, 400),
         # Missing password
-        ({"email": "b@example.com"}, "error", "Password is required.", 400),
+        ({"email": "b@example.com"}, "errors", {'password': ['Missing data for required field.']}, 400),
         # Email already exists
         ({"email": "session@example.com", "password": "sessionpassword123"}, "error", "User session@example.com is unavailable for registration.", 400),
     ],
@@ -105,6 +105,8 @@ def test_unregister(client, app, delete_user):
         ({"phone": "(123) 456-7890"},  200, True),
         # Invalid - missing auth
         ({"phone": "(123) 456-7890"}, 401, False),
+        # Invalid phone format
+        ({"phone": "123-456-7890"},  422, True),
     ]
 )
 def test_update_profile(client, app, session_user, payload, expected_status, include_auth):
