@@ -3,3 +3,8 @@ from .rental_schema import (
     UpdateRentalSchema,
     BaseRentalsSchema
 )
+
+from .auth_schema import (
+    AuthSchema,
+    ProfileSchema
+)
