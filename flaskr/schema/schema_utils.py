@@ -2,6 +2,8 @@ import re
 from marshmallow import ValidationError
 
 #TODO: allow for all valid phone format and sub value for singular valid international phone format
+#   TODO: also consider libraries like https://pypi.org/project/phonenumbers/
+
 # PHONE_REGEX = re.compile(r'^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$') 
 PHONE_REGEX = re.compile(r'^\(\d{3}\)\s\d{3}-\d{4}$')
 
